@@ -1,5 +1,7 @@
+#include <arpa/inet.h>
 #include <errno.h>
 #include <net/if.h>
+#include <netinet/ip.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +11,7 @@
 #include <unistd.h>
 
 int make_client_socket(const char *ip_addr, int port) {
-  int sfd, return_value;
+  int sfd;
   sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (sfd < 0)
     if (sfd < 0) {
@@ -60,9 +62,9 @@ int make_server_socket(int port) {
 
 int accept_connection(int sfd, struct in_addr *client_addr) {
   struct sockaddr_in addr = {0};
-  int addrlen = sizeof(addr);
-  int accept_return = accept(sfd, (struct sockaddr *)&addr, &addrlen);
-  if (listen_result < 0) {
+  socklen_t addrlen = sizeof(addr);
+  int accept_result = accept(sfd, (struct sockaddr *)&addr, &addrlen);
+  if (accept_result < 0) {
     close(sfd);
     perror("Server: Couldn't listen to port");
     return -1;
@@ -101,8 +103,8 @@ int recv_message(int sfd, char **buffer) {
     return -1;
   }
   length = ntohs(length);
-  *buffer = malloc(length+1);
-  int recv_result = recv(sfd, buffer, length, 0);
+  *buffer = malloc(length + 1);
+  recv_result = recv(sfd, buffer, length, 0);
   if (recv_result < 0) {
     close(sfd);
     perror("Unable to recv message body");

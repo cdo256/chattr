@@ -1,9 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
 #include "client.h"
-
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int client_init(client_t *client) {
   memset(client, 0, sizeof(client_t));
@@ -26,7 +25,7 @@ int client_init(client_t *client) {
     goto error_cleanup;
   }
   buffer[getline_result] = '\0';
-  sscanf(buffer, "%d", &client->port);
+  sscanf(buffer, "%hd", &client->port);
 
   printf("Connecting to %s on port %d", client->server, client->port);
   client->socket = make_client_socket(client->server, client->port);
@@ -44,16 +43,16 @@ int client_init(client_t *client) {
   buffer[getline_result] = '\0';
   client->username = strdup(buffer);
 
- error_cleanup:
+error_cleanup:
   free(buffer);
   return -1;
 }
 
 void client_run() {
   static client_t client = {0};
-  if (client_init(client_t *client) < 0) {
+  if (client_init(&client) < 0) {
     printf("Aborting client..\n");
-    return -1;
+    return;
   }
-  return send_string(client.socket, "Hello!");
+  send_string(client.socket, "Hello!");
 }

@@ -6,3 +6,5 @@ typedef struct client_t {
   short port;
   char *username;
 } client_t;
+
+void client_run();

@@ -1,8 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
 #include "server.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int server_init(server_t *server) {
   memset(server, 0, sizeof(server_t));
@@ -16,32 +16,23 @@ int server_init(server_t *server) {
     goto error_cleanup;
   }
   buffer[getline_result] = '\0';
-  sscanf(buffer, "%d", &server->port);
+  sscanf(buffer, "%hd", &server->port);
 
   printf("Making socket on port %d", server->port);
-  server->socket = make_server_socket(server->server, server->port);
+  server->socket = make_server_socket(server->port);
   if (server->socket < 0)
     goto error_cleanup;
   else
     printf("Socket bound successfully!\n");
 
-  printf("Enter an username: ");
-  getline_result = getline(&buffer, &buffer_length, stdin);
-  if (getline_result < 0) {
-    perror("Error occurred while reading line");
-    goto error_cleanup;
-  }
-  buffer[getline_result] = '\0';
-  server->username = strdup(buffer);
-
- error_cleanup:
+error_cleanup:
   free(buffer);
   return -1;
 }
 
 void server_run() {
   static server_t server = {0};
-  if (server_init(server_t *server) < 0) {
+  if (server_init(&server) < 0) {
     printf("Aborting server..\n");
     return;
   }
