@@ -10,6 +10,7 @@ int query_choice(char *string, char *options) {
   do {
     printf("%s [%s]: ", string, options);
     int answer = getchar();
+    while (getchar() != '\n'); // Flush line
     for (int i = 0; options[i]; i++) {
       if (tolower(options[i]) == tolower(answer)) {
         return options[i];
