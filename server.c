@@ -38,3 +38,22 @@ int server_init(server_t *server) {
   free(buffer);
   return -1;
 }
+
+void server_run() {
+  static server_t server = {0};
+  if (server_init(server_t *server) < 0) {
+    printf("Aborting server..\n");
+    return;
+  }
+  char *buffer;
+  int count = recv_message(server.socket, &buffer);
+  if (count < 0) {
+    printf("Aborting server..\n");
+    return;
+  } else if (count > 0) {
+    printf("Recieved '%s'\n", buffer);
+  } else {
+    printf("Recieved empty message..\n");
+    return;
+  }
+}

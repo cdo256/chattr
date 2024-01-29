@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "socket.h"
+#include "client.h"
+#include "server.h"
 
 int query_choice(char *string, char *options) {
   do {
@@ -17,23 +20,14 @@ int query_choice(char *string, char *options) {
 }
 
 static server_t server = {0};
-static client_t client = {0};
 
 int main() {
   int mode = query_choice("Client or server?", "cs");
 
   if (mode == 'c') {
-    if (client_init(&server) == 0) {
-      send_string("Hello!");
-    }
+    client_run();
   } else if (mode == 's') {
-    if (server_init(&server) == 0) {
-      char *buffer;
-      int count = recv_message(&buffer);
-      if (count > 0) {
-        printf("recieved '%s'\n", buffer);
-      }
-    }
+    server_run();
   } else {
     printf("Invalid input.\n");
   }

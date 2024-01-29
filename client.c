@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "client.h"
 
+
 int client_init(client_t *client) {
   memset(client, 0, sizeof(client_t));
   char *buffer = NULL;
@@ -46,4 +47,13 @@ int client_init(client_t *client) {
  error_cleanup:
   free(buffer);
   return -1;
+}
+
+void client_run() {
+  static client_t client = {0};
+  if (client_init(client_t *client) < 0) {
+    printf("Aborting client..\n");
+    return -1;
+  }
+  return send_string(client.socket, "Hello!");
 }
