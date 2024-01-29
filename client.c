@@ -15,7 +15,7 @@ int client_init(client_t *client) {
     perror("Error occurred while reading line");
     goto error_cleanup;
   }
-  buffer[getline_result] = '\0';
+  buffer[getline_result-1] = '\0';
   client->server = strdup(buffer);
 
   printf("Enter a port: ");
@@ -24,7 +24,7 @@ int client_init(client_t *client) {
     perror("Error occurred while reading line");
     goto error_cleanup;
   }
-  buffer[getline_result] = '\0';
+  buffer[getline_result-1] = '\0';
   sscanf(buffer, "%hd", &client->port);
 
   printf("Connecting to %s on port %d", client->server, client->port);
@@ -40,7 +40,7 @@ int client_init(client_t *client) {
     perror("Error occurred while reading line");
     goto error_cleanup;
   }
-  buffer[getline_result] = '\0';
+  buffer[getline_result-1] = '\0';
   client->username = strdup(buffer);
 
 error_cleanup:

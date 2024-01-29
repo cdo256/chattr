@@ -15,7 +15,7 @@ int server_init(server_t *server) {
     perror("Error occurred while reading line");
     goto error_cleanup;
   }
-  buffer[getline_result] = '\0';
+  buffer[getline_result-1] = '\0';
   sscanf(buffer, "%hd", &server->port);
 
   printf("Making socket on port %d", server->port);
