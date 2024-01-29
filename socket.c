@@ -55,6 +55,7 @@ int make_server_socket(int port) {
     perror("Server: Couldn't listen to port");
     return -1;
   }
+  return 0;
 }
 
 int accept_connection(int sfd, struct in_addr *client_addr) {
@@ -66,5 +67,47 @@ int accept_connection(int sfd, struct in_addr *client_addr) {
     perror("Server: Couldn't listen to port");
     return -1;
   }
-  
+  memcpy(&client_addr, &addr.sin_addr, sizeof(struct in_addr));
+  return 0;
+}
+
+int send_string(int sfd, char *string) {
+  unsigned short length = strlen(string);
+  char *buffer = malloc(2 + length);
+  if (buffer == NULL) {
+    close(sfd);
+    fprintf(stderr, "Unable to allocate buffer to send string. Aborting..\n");
+    return -1;
+  }
+  // Store the length first
+  *(unsigned short *)buffer = htons(length);
+  // Then the string
+  memcpy(buffer + 2, string, length);
+  int send_result = send(sfd, buffer, length, 0);
+  if (send_result < 0) {
+    close(sfd);
+    perror("Unable to send message");
+    return -1;
+  }
+  return 0;
+}
+
+int recv_message(int sfd, char **buffer) {
+  unsigned short length;
+  int recv_result = recv(sfd, &length, 2, 0);
+  if (recv_result < 0) {
+    close(sfd);
+    perror("Unable to recv message length");
+    return -1;
+  }
+  length = ntohs(length);
+  *buffer = malloc(length+1);
+  int recv_result = recv(sfd, buffer, length, 0);
+  if (recv_result < 0) {
+    close(sfd);
+    perror("Unable to recv message body");
+    return -1;
+  }
+  buffer[length] = '\0';
+  return length;
 }
