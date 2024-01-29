@@ -13,27 +13,37 @@ int client_init(client_t *client) {
   int getline_result = getline(&buffer, &buffer_length, stdin);
   if (getline_result < 0) {
     perror("Error occurred while reading line");
-    return NULL;
+    goto error_cleanup;
   }
   buffer[getline_result] = '\0';
-  client.server = strdup(buffer);
+  client->server = strdup(buffer);
 
   printf("Enter a port: ");
   getline_result = getline(&buffer, &buffer_length, stdin);
   if (getline_result < 0) {
     perror("Error occurred while reading line");
-    return NULL;
+    goto error_cleanup;
   }
   buffer[getline_result] = '\0';
-  sscanf(buffer, "%d", client.port);
-  client.server = strdup(buffer);
+  sscanf(buffer, "%d", &client->port);
 
+  printf("Connecting to %s on port %d", client->server, client->port);
+  client->socket = make_client_socket(client->server, client->port);
+  if (client->socket < 0)
+    goto error_cleanup;
+  else
+    printf("Successfully connected!\n");
 
-  printf("Connecting to ")
-  client.socket = make_client_socket();
-  if (client.socket < 0) return NULL;
+  printf("Enter an username: ");
+  getline_result = getline(&buffer, &buffer_length, stdin);
+  if (getline_result < 0) {
+    perror("Error occurred while reading line");
+    goto error_cleanup;
+  }
+  buffer[getline_result] = '\0';
+  client->username = strdup(buffer);
 
  error_cleanup:
   free(buffer);
-  return NULL;
+  return -1;
 }
