@@ -18,8 +18,6 @@ int send_format(SOCKET socket, char *fmt, ...) {
   }
   scratch_buffer[length] = '\0';
   send_string(socket, scratch_buffer);
+  return 0;
 }
 
-int send_identify(SOCKET socket, char *username) {
-  return send_format(socket, "/identify %s", username);
-}
