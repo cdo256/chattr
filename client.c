@@ -1,4 +1,6 @@
+#include "util.h"
 #include "client.h"
+#include "message.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,54 +8,40 @@
 
 int client_init(client_t *client) {
   memset(client, 0, sizeof(client_t));
-  char *buffer = NULL;
-  size_t buffer_length = 0;
 
-  printf("Enter an IP address: ");
-  int getline_result = getline(&buffer, &buffer_length, stdin);
-  if (getline_result < 0) {
-    perror("Error occurred while reading line");
+  if (read_ip_addr("Enter an IP address: ", &client->server) < 0) {
     goto error_cleanup;
   }
-  buffer[getline_result-1] = '\0';
-  client->server = strdup(buffer);
 
-  printf("Enter a port: ");
-  getline_result = getline(&buffer, &buffer_length, stdin);
-  if (getline_result < 0) {
-    perror("Error occurred while reading line");
+  if (read_port("Enter a port: ", &client->port) < 0) {
     goto error_cleanup;
   }
-  buffer[getline_result-1] = '\0';
-  sscanf(buffer, "%hd", &client->port);
 
-  printf("Connecting to %s on port %d\n", client->server, client->port);
+  printf("Connecting to %s on port %d...\n", client->server, client->port);
   client->socket = make_client_socket(client->server, client->port);
   if (client->socket < 0)
     goto error_cleanup;
   else
     printf("Successfully connected!\n");
 
-  printf("Enter an username: ");
-  getline_result = getline(&buffer, &buffer_length, stdin);
-  if (getline_result < 0) {
-    perror("Error occurred while reading line");
+  if (read_alphanum("Enter a username: ", &client->username) < 0)
+    goto error_cleanup;
+
+  if (send_format(client->socket, "/identify %s", client->username) < 0) {
+    eprintf("Unable to send /identify\n");
     goto error_cleanup;
   }
-  buffer[getline_result-1] = '\0';
-  client->username = strdup(buffer);
 
   return 0;
 
 error_cleanup:
-  free(buffer);
   return -1;
 }
 
 void client_run() {
   static client_t client = {0};
   if (client_init(&client) < 0) {
-    printf("Aborting client..\n");
+    eprintf("Aborting client..\n");
     return;
   }
   send_string(client.socket, "Hello!");
