@@ -27,7 +27,7 @@ int client_init(client_t *client) {
   buffer[getline_result-1] = '\0';
   sscanf(buffer, "%hd", &client->port);
 
-  printf("Connecting to %s on port %d", client->server, client->port);
+  printf("Connecting to %s on port %d\n", client->server, client->port);
   client->socket = make_client_socket(client->server, client->port);
   if (client->socket < 0)
     goto error_cleanup;
@@ -42,6 +42,8 @@ int client_init(client_t *client) {
   }
   buffer[getline_result-1] = '\0';
   client->username = strdup(buffer);
+
+  return 0;
 
 error_cleanup:
   free(buffer);

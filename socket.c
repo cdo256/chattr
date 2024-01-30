@@ -57,20 +57,20 @@ int make_server_socket(int port) {
     perror("Server: Couldn't listen to port");
     return -1;
   }
-  return 0;
+  return sfd;
 }
 
 int accept_connection(int sfd, struct in_addr *client_addr) {
   struct sockaddr_in addr = {0};
   socklen_t addrlen = sizeof(addr);
-  int accept_result = accept(sfd, (struct sockaddr *)&addr, &addrlen);
-  if (accept_result < 0) {
+  int nsfd = accept(sfd, (struct sockaddr *)&addr, &addrlen);
+  if (nsfd < 0) {
     close(sfd);
     perror("Server: Couldn't listen to port");
     return -1;
   }
-  memcpy(&client_addr, &addr.sin_addr, sizeof(struct in_addr));
-  return 0;
+  memcpy(client_addr, &addr.sin_addr, sizeof(struct in_addr));
+  return nsfd;
 }
 
 int send_string(int sfd, char *string) {
@@ -85,7 +85,7 @@ int send_string(int sfd, char *string) {
   *(unsigned short *)buffer = htons(length);
   // Then the string
   memcpy(buffer + 2, string, length);
-  int send_result = send(sfd, buffer, length, 0);
+  int send_result = send(sfd, buffer, length + 2, 0);
   if (send_result < 0) {
     close(sfd);
     perror("Unable to send message");
@@ -104,12 +104,16 @@ int recv_message(int sfd, char **buffer) {
   }
   length = ntohs(length);
   *buffer = malloc(length + 1);
-  recv_result = recv(sfd, buffer, length, 0);
+  recv_result = recv(sfd, *buffer, length, 0);
   if (recv_result < 0) {
     close(sfd);
     perror("Unable to recv message body");
     return -1;
   }
-  buffer[length] = '\0';
+  (*buffer)[length] = '\0';
   return length;
+}
+
+void inet_to_string(struct in_addr addr, char *buffer) {
+  inet_ntop(AF_INET, &addr, buffer, INET_ADDRSTRLEN);
 }

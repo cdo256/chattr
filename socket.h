@@ -7,3 +7,4 @@ int make_server_socket(int port);
 int accept_connection(int sfd, struct in_addr *client_addr);
 int send_string(int sfd, char *string);
 int recv_message(int sfd, char **buffer);
+void inet_to_string(struct in_addr addr, char *buffer);
