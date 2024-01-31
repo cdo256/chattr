@@ -44,5 +44,17 @@ void client_run() {
     eprintf("Aborting client..\n");
     return;
   }
-  send_string(client.socket, "Hello!");
+  char *buffer = NULL;
+  size_t buffer_length = 0;
+  while (1) {
+    printf("\r> ");
+    int getline_result = getline(&buffer, &buffer_length, stdin);
+    if (getline_result < 0) {
+      perror("Error occurred while reading line");
+      continue;
+    }
+    buffer[getline_result-1] = '\0';
+    send_format(client.socket, "*%s", buffer);
+    recv_message(client.socket, &buffer);
+  }
 }

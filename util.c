@@ -43,11 +43,16 @@ int read_port(char *prompt, short *value) {
       perror("Error occurred while reading line");
       continue;
     }
-    buffer[getline_result-1] = '\0';
-    int result = sscanf(buffer, "%hd", value);
-    if (result <= 0) {
-      eprintf("Input is not a valid port number.");
-      continue;
+    if (getline_result != 1) {
+      buffer[getline_result-1] = '\0';
+      int result = sscanf(buffer, "%hd", value);
+      if (result <= 0) {
+        eprintf("Input is not a valid port number.");
+        continue;
+      }
+    } else {
+      // default value
+      *value = 10000;
     }
   } while (0);
   free(buffer);
@@ -64,12 +69,17 @@ int read_ip_addr(char *prompt, char **addr_string) {
       perror("Error occurred while reading line");
       continue;
     }
-    buffer[getline_result-1] = '\0';
-    if (inet_addr(buffer) == INADDR_NONE) {
-      eprintf("Invalid IP address\n");
-      continue;
+    if (getline_result != 1) {
+      buffer[getline_result-1] = '\0';
+      if (inet_addr(buffer) == INADDR_NONE) {
+        eprintf("Invalid IP address\n");
+        continue;
+      }
+      *addr_string = strdup(buffer);
+    } else {
+      // default value
+      *addr_string = strdup("127.0.0.1");
     }
-    *addr_string = strdup(buffer);
   } while (0);
   free(buffer);
   return 0;
@@ -95,5 +105,4 @@ int read_alphanum(char *prompt, char **input) {
   free(buffer);
   return 0;
 }
-
 

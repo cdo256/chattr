@@ -54,8 +54,21 @@ int server_handle_connect(server_t *server, SOCKET new_socket, struct in_addr ad
 }
 
 int server_process_message(server_t *server, SOCKET socket) {
-  //TODO
-  return -1;
+  char *message = NULL;
+  int recv_result = recv_message(socket, &message);
+  if (recv_result < 0) {
+    eprintf("Error %d\n, recv_result");
+    return -1;
+  } else if (recv_result == 0) {
+    // Nothing to read
+    return 0;
+  }
+  printf("Recieved '%s'\n", message);
+  for (int i = 0; i < MAX_CONNECTIONS; i++) {
+    send_string(server->connections[i].socket, message);
+  }
+  free(message);
+  return 1;
 }
 
 void server_run() {
@@ -63,13 +76,17 @@ void server_run() {
   if (server_init(&server) < 0)
     goto abort;
 
-
   while (1) {
     fd_set read_fds = server.fds;
-    if (select(server.max_fd + 1, &read_fds, NULL, NULL, NULL) < 0) {
+    int select_result = select(server.max_fd + 1, &read_fds, NULL, NULL, NULL);
+    if (select_result < 0) {
       perror("Error select failed");
       goto abort;
+    } else if (select_result == 0) {
+      continue;
     }
+    /* printf("Select returned %d\n", select_result); */
+    /* printf("read_fds = %d\n", ((unsigned int*)&read_fds)[0]); */
     for (int i = 0; i <= server.max_fd; i++) {
       if (FD_ISSET(i, &read_fds)) {
         if (i == server.socket) {
