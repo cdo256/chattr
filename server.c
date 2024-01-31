@@ -42,6 +42,7 @@ int server_handle_connect(server_t *server, SOCKET new_socket, struct in_addr ad
     close(new_socket);
     return -1;
   }
+  send_format(new_socket, "Welcome!");
   if (new_socket > server->max_fd)
     server->max_fd = new_socket;
   // We're accepting this connection. Add it to our list
@@ -65,7 +66,10 @@ int server_process_message(server_t *server, SOCKET socket) {
   }
   printf("Recieved '%s'\n", message);
   for (int i = 0; i < MAX_CONNECTIONS; i++) {
-    send_string(server->connections[i].socket, message);
+    SOCKET socket = server->connections[i].socket;
+    if (socket) {
+      send_string(socket, message);
+    }
   }
   free(message);
   return 1;
