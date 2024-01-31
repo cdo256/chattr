@@ -146,7 +146,7 @@ int recv_message(int sfd, char **buffer) {
     return -1;
   }
   length = ntohs(length);
-  *buffer = malloc(length + 1);
+  *buffer = resize(*buffer, length + 1);
   recv_result = recv(sfd, *buffer, length, MSG_WAITALL);
   if (recv_result < 0) {
     perror("Unable to recv message body");
