@@ -21,7 +21,7 @@ int set_socket_nonblocking(SOCKET sock) {
     perror("Error: Unable to get socket properties");
     return -1;
   }
-  fcntl(sock, F_SETFL, flags | O_NONBLOCK); 
+  fcntl(sock, F_SETFL, flags | O_NONBLOCK);
   if (flags < 0) {
     close(sock);
     perror("Error: Unable to set socket as non-blocking");
