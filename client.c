@@ -38,6 +38,28 @@ error_cleanup:
   return -1;
 }
 
+int client_process_messages(client_t *client) {
+  int response = 0;
+  char *message = NULL;
+  int count = 0;
+  do {
+    response = recv_message(client->socket, &message);
+    if (response < 0) {
+      eprintf("Could not get message from server\n");
+      break;
+    } else if (response > 0) {
+      printf("%s\n", message);
+      count++;
+    }
+  } while (response != 0);
+  free(message);
+  if (response < 0) {
+    return response;
+  } else {
+    return count;
+  }
+}
+
 void client_run() {
   static client_t client = {0};
   if (client_init(&client) < 0) {
@@ -47,14 +69,22 @@ void client_run() {
   char *buffer = NULL;
   size_t buffer_length = 0;
   while (1) {
+    little_nap();
+    client_process_messages(&client);
     printf("\r> ");
     int getline_result = getline(&buffer, &buffer_length, stdin);
     if (getline_result < 0) {
       perror("Error occurred while reading line");
       continue;
+    } else if (getline_result <= 1) {
+      // Empty message. Just pull new messages again.
+      continue;
     }
     buffer[getline_result-1] = '\0';
-    send_format(client.socket, "*%s", buffer);
-    recv_message(client.socket, &buffer);
+    printf("Sending '%s'\n", buffer);
+    if (send_format(client.socket, "*%s", buffer) < 0) {
+      eprintf("Error sending message\n");
+      continue;
+    }
   }
 }
