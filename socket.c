@@ -124,6 +124,7 @@ int send_string(int sfd, char *string) {
     close(sfd);
     return -1;
   }
+  free(buffer);
   return 0;
 }
 
