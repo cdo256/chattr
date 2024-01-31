@@ -131,17 +131,20 @@ int send_string(int sfd, char *string) {
 int recv_message(int sfd, char **buffer) {
   unsigned short length;
   int recv_result;
-  do {
-    recv_result = recv(sfd, &length, 2, MSG_WAITALL);
-  } while (recv_result < 0 && errno == EAGAIN);
+  recv_result = recv(sfd, &length, 2, MSG_WAITALL);
+
   if (recv_result < 0) {
+    if (errno == EAGAIN) {
+      // Not a real error code. Ignore
+      return 0;
+    }
     perror("Error: Unable to recv message length");
     close(sfd);
     return -1;
   } else if (recv_result == 0) {
     return 0;
   } else if (recv_result < 2) {
-    eprintf("Incomplete packet. Only %d bytes recieved\n", recv_result);
+    eprintf("Incomplete packet. Only %d/%d bytes recieved\n", recv_result, 2);
     close(sfd);
     return -1;
   }
@@ -153,7 +156,7 @@ int recv_message(int sfd, char **buffer) {
     close(sfd);
     return -1;
   } else if (recv_result < length) {
-    eprintf("Incomplete packet. Only %d bytes recieved\n", recv_result + 2);
+    eprintf("Incomplete packet. Only %d/%d bytes recieved\n", recv_result + 2, length + 2);
     close(sfd);
     return -1;
   }
