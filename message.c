@@ -21,3 +21,11 @@ int send_format(SOCKET socket, char *fmt, ...) {
   return 0;
 }
 
+int await_message(int sfd, char **buffer) {
+  int recv_result;
+  do {
+    recv_result = recv_message(sfd, buffer);
+  } while (recv_result == 0);
+  return recv_result;
+}
+
