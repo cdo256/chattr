@@ -13,24 +13,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-int set_socket_nonblocking(SOCKET sfd) {
-  printf("Setting socket %d as non-blocking\n", sfd);
-  int flags = fcntl(sfd, F_GETFL, 0);
-  if (flags < 0) {
-    close(sfd);
-    perror("Error: Unable to get socket properties");
-    return -1;
-  }
-  fcntl(sfd, F_SETFL, flags | O_NONBLOCK); 
-  if (flags < 0) {
-    close(sfd);
-    perror("Error: Unable to set socket as non-blocking");
-    return -1;
-  }
-
-  return 0;
-}
-
 int make_client_socket(const char *ip_addr, int port) {
   int sfd;
   sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -48,9 +30,6 @@ int make_client_socket(const char *ip_addr, int port) {
   if (connect_result < 0 && errno != EINTR) {
     close(sfd);
     perror("Error: Unable to connect");
-    return -1;
-  }
-  if (set_socket_nonblocking(sfd) < 0) {
     return -1;
   }
 
@@ -81,9 +60,6 @@ int make_server_socket(int port) {
     perror("Server: Couldn't listen to port");
     return -1;
   }
-  if (set_socket_nonblocking(sfd) < 0) {
-    return -1;
-  }
 
   return sfd;
 }
@@ -98,9 +74,6 @@ int accept_connection(int sfd, struct in_addr *client_addr) {
     return -1;
   }
   memcpy(client_addr, &addr.sin_addr, sizeof(struct in_addr));
-  if (set_socket_nonblocking(nsfd) < 0) {
-    return -1;
-  }
 
   return nsfd;
 }
