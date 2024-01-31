@@ -6,6 +6,15 @@
 #include <ctype.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <threads.h>
+
+void little_nap() {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100 * 1000000;  // 100 milliseconds
+
+    thrd_sleep(&ts, NULL);
+}
 
 void eprintf(const char *string, ...) {
   va_list ap;
@@ -23,6 +32,17 @@ void wprintf(const char *string, ...) {
   va_end(ap);
 }
 
+void *resize(void *buffer, size_t new_length) {
+  void *result = realloc(buffer, new_length);
+  if (result == NULL) {
+    free(buffer);
+    eprintf("Unable to allocate %d bytes", new_length);
+    return NULL;
+  } else {
+    return result;
+  }
+}
+
 int validate_alphanum(char *string) {
   for (int i = 0; string[i]; i++) {
     if (!isalnum(string[i])) {
@@ -32,6 +52,7 @@ int validate_alphanum(char *string) {
   }
   return 0;
 }
+
 
 int read_port(char *prompt, short *value) {
   char *buffer = NULL;
