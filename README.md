@@ -9,7 +9,7 @@ It can be run on Both Linux and Windows, although the Windows compatibility laye
 It has been designed to depend on as few other packages as possible. It depends on:
 
  - `make`
- - a GCC toolchain
+ - a C compiler toolchain such as Clang, GCC, or MinGW
  - A few common utilities like `rm`
 
 This can be set up using Guix as:
